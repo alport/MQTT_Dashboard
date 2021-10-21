@@ -1,2 +1,1 @@
-python -m pip install --user --upgrade pip
 pip install paho-mqtt
