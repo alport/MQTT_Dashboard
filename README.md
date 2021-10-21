@@ -1,5 +1,5 @@
 # MQTT_Dashboard
- A dashboard which is updated via MQTT payloads from aMesh.
+ A dashboard which is updated via MQTT payloads from aMesh, a simple LoRa ESP32 based network, using the LoRa protocol.
 
  An aMesh gateway sends messages via a serial link to a Raspberry Pi computer running Node-Red. These Node-Red payloads are sent to a cloud-based Shiftr broker.
 
