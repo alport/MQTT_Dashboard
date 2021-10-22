@@ -51,7 +51,7 @@ def processT(payload):
 def processD(payload):
     global table
     Dparts=payload.split(",")
-    if checkPayload(Dparts,7):  # Dumkirk:5, Highlands:7
+    if checkPayload(Dparts,5):  # Dumkirk:5, Highlands:7
         Darray = np.array(Dparts,dtype=np.int32)
         for i in range(len(slots)):
             nslot=Darray[4]  # was 0!!! error?
