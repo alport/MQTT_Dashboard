@@ -5,4 +5,4 @@
 
  In order to have universal access to the payload traffic, the MQTTdashboard subscribes to these messages using the PahoMqtt python library.
 
- The problem is that the incoming messsages are processed by a "on-receive" callback. If a StreamLit command such a st.table is included in this callback, StreamLit objects (with an out of context error), and hence, as a compromise, this st.table command needs to be executed in a slleep loop. Need to find a better solution.
+ The problem is that the incoming messsages are processed by a "on-receive" callback. If a StreamLit command such a st.table is included in this callback, StreamLit objects (with an out of context error), and hence, as a compromise, this st.table command needs to be executed in a sleep loop. Need to find a better solution.

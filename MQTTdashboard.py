@@ -13,8 +13,26 @@ st.set_page_config(layout="wide")
 broker="solarcrest962.cloud.shiftr.io"
 
 #slots=np.array([1,2,6,9],dtype=np.int32) # Dunkirk
-slots=np.array([0,3,4,7],dtype=np.int32) # Highlands
+#slots=np.array([0,3,4,7],dtype=np.int32) # Highlands
 #nodes=[0,1,2,3,4,5,6,7,8,9] # not used??
+
+
+# https://docs.streamlit.io/library/api-reference/layout/st.sidebar
+site = st.sidebar.selectbox(
+    "Select the site:",
+    ("Dunkirk", "Highlands")
+)
+
+if (site=="Highlands"):
+    slots=np.array([0,3,4,7],dtype=np.int32)
+    subscribeTopic="Highlands/data/#"
+    topicT="Highlands/data/T"
+    topicD="Highlands/data/D"
+if (site=="Dunkirk"):
+    slots=np.array([1,2,6,9],dtype=np.int32)
+    subscribeTopic="Dunkirk/data/#"
+    topicT="Dunkirk/data/T"
+    topicD="Dunkirk/data/D"
 
 table=np.zeros((10,len(slots)*3),dtype=np.int32)
 Ttable=np.zeros(len(slots),dtype=np.int32)
@@ -27,11 +45,11 @@ def checkPayload(parts,nvals):
     state=True
     if (len(parts)!=nvals):
         state=False
-        return state
+        print("Error: Length is:",len(parts),"Should be:",nvals,parts)
     for i in range(len(parts)):
         if(parts[i]=='NaN'):
             state=False
-            return state
+            print("Error: NaN in: ",parts)
     return state
 
 # processT
@@ -45,13 +63,11 @@ def processT(payload):
             if (nslot==slots[i]):
                 ncol= np.where(slots == nslot)[0][0]
                 Ttable[ncol]=Tarray[1]
-    else:
-        print("Error, NaN in: ",Tparts)
 
 def processD(payload):
     global table
     Dparts=payload.split(",")
-    if checkPayload(Dparts,5):  # Dumkirk:5, Highlands:7
+    if checkPayload(Dparts,5):  # Dumkirk:5, Highlands:7 no, 5 for highlands!
         Darray = np.array(Dparts,dtype=np.int32)
         for i in range(len(slots)):
             nslot=Darray[4]  # was 0!!! error?
@@ -59,13 +75,12 @@ def processD(payload):
                 ncol = np.where(slots == nslot)[0][0]*3
                 nnode=Darray[0]
                 table[nnode,ncol:ncol+3]=Darray[1:4]
-    else:
-        print("Error, NaN in: ",Dparts)
 
 def on_message(client, userdata, msg):
     time.sleep(1)
-    topicT="Highlands/data/T"
-    topicD="Highlands/data/D"
+    #topicT="Dunkirk/data/T"
+    #topicD="Dunkirk/data/D"
+
     print("Received",msg.topic,",",str(msg.payload.decode("utf-8")))
     payload=str(msg.payload.decode("utf-8"))
     if (msg.topic==topicT):
@@ -81,10 +96,9 @@ def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
     # Subscribing in on_connect() means that if we lose the connection and
     # reconnect then subscriptions will be renewed.
-    topic="Highlands/data/#"
-    print("Subscribing to: "+topic)
-    #client.subscribe("Dunkirk/data/#")
-    client.subscribe("Highlands/data/#")
+    #topic="Dunkirk/data/#"
+    print("Subscribing to: "+subscribeTopic)
+    client.subscribe(subscribeTopic)
     
 
 client= paho.Client("client-001") #create client object 
