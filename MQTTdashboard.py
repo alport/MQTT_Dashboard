@@ -16,12 +16,12 @@ broker="solarcrest962.cloud.shiftr.io"
 #slots=np.array([0,3,4,7],dtype=np.int32) # Highlands
 #nodes=[0,1,2,3,4,5,6,7,8,9] # not used??
 
-
 # https://docs.streamlit.io/library/api-reference/layout/st.sidebar
 site = st.sidebar.selectbox(
     "Select the site:",
     ("Dunkirk", "Highlands")
 )
+
 
 if (site=="Highlands"):
     slots=np.array([0,3,4,7],dtype=np.int32)
@@ -33,6 +33,11 @@ if (site=="Dunkirk"):
     subscribeTopic="Dunkirk/data/#"
     topicT="Dunkirk/data/T"
     topicD="Dunkirk/data/D"
+
+selectNode=st.sidebar.selectbox(
+    "Select Slot:",
+    (slots[0],slots[1],slots[2],slots[3])
+    )
 
 table=np.zeros((10,len(slots)*3),dtype=np.int32)
 Ttable=np.zeros(len(slots),dtype=np.int32)
