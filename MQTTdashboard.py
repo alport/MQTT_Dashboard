@@ -12,16 +12,12 @@ st.set_page_config(layout="wide")
 
 broker="solarcrest962.cloud.shiftr.io"
 
-#slots=np.array([1,2,6,9],dtype=np.int32) # Dunkirk
-#slots=np.array([0,3,4,7],dtype=np.int32) # Highlands
-#nodes=[0,1,2,3,4,5,6,7,8,9] # not used??
-
 # https://docs.streamlit.io/library/api-reference/layout/st.sidebar
+
 site = st.sidebar.selectbox(
     "Select the site:",
     ("Dunkirk", "Highlands")
 )
-
 
 if (site=="Highlands"):
     slots=np.array([0,3,4,7],dtype=np.int32)
@@ -34,10 +30,14 @@ if (site=="Dunkirk"):
     topicT="Dunkirk/data/T"
     topicD="Dunkirk/data/D"
 
-selectNode=st.sidebar.selectbox(
+selectSlot=st.sidebar.selectbox(
     "Select Slot:",
     (slots[0],slots[1],slots[2],slots[3])
     )
+
+selectNode=st.sidebar.selectbox(
+    "Select Node:",
+    (0,1,2,3,4,5,6,7,8,9))
 
 table=np.zeros((10,len(slots)*3),dtype=np.int32)
 Ttable=np.zeros(len(slots),dtype=np.int32)
@@ -118,11 +118,34 @@ print("connecting to broker ",broker)
 client.username_pw_set(username="solarcrest962",password="28zvKkReyN3VhW8W")
 client.connect(broker, 1883, 60)
 
+# Try and view table using pandas
+# https://pandas.pydata.org/pandas-docs/stable/user_guide/cookbook.html
+# rows=('Node %d' % i for i in range(10))
+# df = pd.DataFrame(np.random.randn(10, 12),
+#     columns=('col %d' % i for i in range(12)),index=rows)
+
+# st.dataframe(df)  # Same as st.write(df)
+
+rows=['Node %d' % i for i in range(10)]
+
 client.loop_start() #start loop to process received messages  - BETTER can ctrl C!!!
 #client.loop_forever()
+
+# df working - get scrolling!
+
+
+cols=[]
+for i in range(4):
+    cols.append('T '+('Slot %d' % slots[i]))
+    cols.append(('S%d' % slots[i])+'Ch0')
+    cols.append(('S%d' % slots[i])+'Ch1')
+
+#cols=['Slot %d' % i for i in range(12)]
+
 while True:
-    tableData.write(table)
-    #TtableData.write(Ttable)
+    #tableData.write(table)
+    df=pd.DataFrame(table,columns=cols,index=rows)
+    tableData.write(df)
     TtableData.write(pd.DataFrame({
         'Slot '+str(slots[0]):[Ttable[0]],
         'Slot '+str(slots[1]):[Ttable[1]],
