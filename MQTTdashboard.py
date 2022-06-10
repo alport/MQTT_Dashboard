@@ -24,6 +24,7 @@ if (site=="Highlands"):
     subscribeTopic="Highlands/data/#"
     topicT="Highlands/data/T"
     topicD="Highlands/data/D"
+
 if (site=="Dunkirk"):
     slots=np.array([1,2,6,9],dtype=np.int32)
     subscribeTopic="Dunkirk/data/#"
@@ -39,12 +40,19 @@ selectNode=st.sidebar.selectbox(
     "Select Node:",
     (0,1,2,3,4,5,6,7,8,9))
 
+selectChannel=st.sidebar.selectbox(
+    "Select Channel:",
+    (0,1,2,3))
+
 table=np.zeros((10,len(slots)*3),dtype=np.int32)
 Ttable=np.zeros(len(slots),dtype=np.int32)
 ncolumns=table.shape[1]
 
 tableData = st.empty()
 TtableData=st.empty()
+pData=st.empty()  # plot
+
+yvals=[]
 
 def checkPayload(parts,nvals):
     state=True
@@ -79,6 +87,8 @@ def processD(payload):
             if (nslot==slots[i]):
                 ncol = np.where(slots == nslot)[0][0]*3
                 nnode=Darray[0]
+                if (nnode==selectNode):
+                    yvals.append(Darray[1+selectChannel])
                 table[nnode,ncol:ncol+3]=Darray[1:4]
 
 def on_message(client, userdata, msg):
@@ -153,4 +163,7 @@ while True:
         'Slot '+str(slots[3]):[Ttable[3]]
         }))
     #print("Updating:",i)
+    # Now the plot
+    chart_data = pd.DataFrame(yvals)
+    pData.line_chart(chart_data)
     time.sleep(2)
